@@ -66,10 +66,11 @@ if (!user) {
   }
 };
 
-export const removeFromCart = async (id, cart, setCart, user) => {
+export const removeFromCart = async (id, cart, setCart) => {
+  const user = JSON.parse(localStorage.getItem("user"));
   if (!user) return;
 
-  const productInCart = cart.find((item) => item.id === id && item.userId === user.id);
+  const productInCart = cart.find((item) => item.id === id);
   if (!productInCart) return;
 
   if (productInCart.quantity > 1) {
@@ -77,18 +78,42 @@ export const removeFromCart = async (id, cart, setCart, user) => {
       item.id === id ? { ...item, quantity: item.quantity - 1 } : item
     );
     setCart(updatedCart);
+
     try {
       await axios.patch(`http://localhost:5000/cart/${id}`, { quantity: productInCart.quantity - 1 });
+      Swal.fire({
+        title: "Quantity Updated!",
+        text: `"${productInCart.title}" quantity decreased.`,
+        icon: "info",
+        timer: 2000,
+      });
     } catch (error) {
       console.error("Error updating cart item:", error);
     }
   } else {
-    const updatedCart = cart.filter((item) => item.id !== id);
-    setCart(updatedCart);
-    try {
-      await axios.delete(`http://localhost:5000/cart/${id}`);
-    } catch (error) {
-      console.error("Error deleting cart item:", error);
-    }
+    Swal.fire({
+      title: "Remove Item?",
+      text: `Do you want to remove "${productInCart.title}" from your cart?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, remove it!",
+      cancelButtonText: "Cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const updatedCart = cart.filter((item) => item.id !== id);
+        setCart(updatedCart);
+        try {
+          await axios.delete(`http://localhost:5000/cart/${id}`);
+          Swal.fire({
+            title: "Removed!",
+            text: `"${productInCart.title}" has been removed from your cart.`,
+            icon: "success",
+            timer: 2000,
+          });
+        } catch (error) {
+          console.error("Error deleting cart item:", error);
+        }
+      }
+    });
   }
 };

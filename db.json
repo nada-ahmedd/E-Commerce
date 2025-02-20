@@ -229,7 +229,7 @@
         "rate": 3.9,
         "count": 120
       },
-      "quantity": 7
+      "quantity": 3
     },
     {
       "id": "2",
@@ -256,7 +256,7 @@
         "rate": 4.7,
         "count": 500
       },
-      "quantity": 3,
+      "quantity": 4,
       "userId": "2ce0"
     },
     {
